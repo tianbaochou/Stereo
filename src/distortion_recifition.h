@@ -1,0 +1,13 @@
+#ifndef STEREO_STEREO_VISION_DISTORTION_RECIFITION_H
+#define STEREO_STEREO_VISION_DISTORTION_RECIFITION_H
+
+class DistortionRecifition
+{
+
+
+
+
+};
+
+
+#endif

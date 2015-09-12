@@ -1,0 +1,6 @@
+#ifndef STEREO_STEREO_VISION_UI_H
+#define STEREO_STEREO_VISION_UI_H
+
+
+
+#endif
