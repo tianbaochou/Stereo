@@ -6,7 +6,41 @@
 #include "qedit.h"
 #include "dshow.h"
 #include <windows.h>
+
+#include <opencv2\highgui\highgui.hpp>
 #include <opencv2\core\core.hpp>
+
+
+class CameraParam
+{
+public:
+    cv::Matx33d _left_camera_matrix;
+    cv::Matx33d _right_camera_matrix;
+    cv::Matx33d _R;
+    cv::Matx31d _T;
+    cv::Matx41d _Distortion_left;
+    cv::Matx41d _Distortion_right;
+    cv::Matx33d _RectificationR_left;
+    cv::Matx33d _RectificationR_right;
+    cv::Matx34d _P1;
+    cv::Matx34d _P2;
+    cv::Matx44d _Q;
+   
+    CameraParam& operator=(CameraParam &cp) 
+    {
+        _left_camera_matrix = cp._left_camera_matrix;
+        _right_camera_matrix = cp._right_camera_matrix;
+        _R = cp._R;
+        _T = cp._T;
+        _Distortion_left = cp._Distortion_left;
+        _Distortion_right = cp._Distortion_right;
+        _RectificationR_left = cp._RectificationR_left;
+        _RectificationR_right = cp._RectificationR_right;
+        _P1 = cp._P1;
+        _P2 = cp._P2;
+        _Q = cp._Q;
+    }
+};
 
 class Camera
 {
