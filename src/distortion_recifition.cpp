@@ -24,12 +24,12 @@ void DistortionRecifition::SetParamter(cv::Mat &left_image, cv::Mat &right_image
 void DistortionRecifition::GetRecifyImage(cv::Mat &left_recify_image, cv::Mat &right_recify_image, 
     int inter_polation)
 {
-    cv::initUndistortRectifyMap(_left_image, _camera_param._Distortion_left,
+    cv::initUndistortRectifyMap(_camera_param._left_camera_matrix, _camera_param._Distortion_left,
         _camera_param._RectificationR_left, _camera_param._P1, _new_image_size,
         CV_32FC1, _map_x1, _map_y1);
 
-    cv::initUndistortRectifyMap(_right_image, _camera_param._Distortion_right,
-        _camera_param._RectificationR_left, _camera_param._P2, _new_image_size,
+    cv::initUndistortRectifyMap(_camera_param._right_camera_matrix, _camera_param._Distortion_right,
+        _camera_param._RectificationR_right, _camera_param._P2, _new_image_size,
         CV_32FC1, _map_x2, _map_y2);
 
     cv::remap(_left_image, left_recify_image, _map_x1, _map_y1, inter_polation);

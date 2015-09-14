@@ -39,6 +39,7 @@ public:
         _P1 = cp._P1;
         _P2 = cp._P2;
         _Q = cp._Q;
+        return *this;
     }
 };
 

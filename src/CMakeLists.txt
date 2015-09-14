@@ -39,6 +39,9 @@ ui.cpp
 ui.h
 camera.h
 camera.cpp
+stereo.h
+stereo.cpp
+stereo_error.h
 )
 
 add_executable(Stereo_Vision ${Stereo_src})
