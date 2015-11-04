@@ -42,6 +42,8 @@ void Stereo::Start()
 
 void Stereo::Process()
 {
+    _distor_recifition = new DistortionRecifition(CameraType::CT_FISHEYE, RectifyType::RT_NORMAL);
+    cv::Mat R1, R2, P1, P2, Q;
     while (_running)
     {
         std::lock_guard<mutex> lock(_read_image);
@@ -54,12 +56,23 @@ void Stereo::Process()
                 continue;
             }
         }
-
-        // First rectify distortion
         cv::Rect left_roi, right_roi;
-        _distor_recifition.SetParamter(_left_image, _right_image, CV_CALIB_ZERO_DISPARITY, 0, cv::Size(_left_image.cols, _left_image.rows), cv::Size(_left_image.cols, _left_image.rows));
-        _distor_recifition.Recifition(_camera_param, left_roi, right_roi);
-        _distor_recifition.GetRecifyImage(_left_recifition_image, _right_recifition_image);
+        _distor_recifition->Recifition(_camera_param, left_roi, right_roi);
+
+        cv::Mat map11, map12, map21, map22;
+        cv::Point2f log_range(0 * PI, 1 * PI);
+        cv::Point2f lat_range(0 * PI, 1 * PI);
+        cv::Mat camera_matrix_new = cv::Mat(_camera_param._left_camera_matrix);
+
+
+        // First   distortion
+        //cv::Rect left_roi, right_roi;
+        //_distor_recifition.SetParamter(_left_image, _right_image, CV_CALIB_ZERO_DISPARITY, 0, cv::Size(_left_image.cols, _left_image.rows), cv::Size(_left_image.cols, _left_image.rows));
+        //_distor_recifition.Recifition(_camera_param, left_roi, right_roi);
+        //_distor_recifition.GetRecifyImage(_left_recifition_image, _right_recifition_image);
+
+        
+
         //Test
         cv::imshow("left", _left_recifition_image);
         cv::imshow("right", _right_recifition_image);

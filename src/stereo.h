@@ -23,7 +23,7 @@ public:
 private:
     void Process();
     CameraParam _camera_param;
-    DistortionRecifition _distor_recifition;
+    DistortionRecifition *_distor_recifition;
     std::mutex _read_image;
     std::atomic_bool _running;
     std::shared_ptr<std::thread> _process_thread;
