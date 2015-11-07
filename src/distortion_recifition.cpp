@@ -1,6 +1,9 @@
 #include "distortion_recifition.h"
+#include <iostream>
 
 using cv::Mat;
+using std::cout;
+using std::endl;
 void DistortionRecifition::Recifition(CameraParam & cp, cv::Rect &left_roi, cv::Rect &right_roi)
 {
 #if 0
@@ -12,38 +15,63 @@ void DistortionRecifition::Recifition(CameraParam & cp, cv::Rect &left_roi, cv::
 #else
     _camera_param = cp;
 
-    // 获取第二个相机到第一个相机间的转换
-    Mat R_inv = Mat(cp._R.inv());
-    Mat T_inv = Mat(-cp._R.t()*cp._T);
+    Mat K1 = cp._left_camera_matrix, K2 = cp._right_camera_matrix, R = cp._R;
+    Mat T = cp._T;
+    cp._RectificationR_left.create(3, 3, CV_32F);
+    cp._RectificationR_right.create(3, 3, CV_32F);
+    Mat R1 = cp._RectificationR_left;
+    Mat R2 = cp._RectificationR_right;
+    cp._P1.create(3, 4, CV_32F);
+    cp._P2.create(3, 4, CV_32F);
+    Mat P1 = cp._P1;
+    Mat P2 = cp._P2;
 
+    // Convert to float 
+    if (K1.type() != CV_32F)
+    {
+        K1.convertTo(K1, CV_32F);
+        cp._left_camera_matrix.convertTo(cp._left_camera_matrix, CV_32F);
+    }
+    if (K2.type() != CV_32F)
+    {
+        K2.convertTo(K2, CV_32F);
+        cp._right_camera_matrix.convertTo(cp._right_camera_matrix, CV_32F);
+    }
+    if (R.type() != CV_32F)
+    {
+        R.convertTo(R, CV_32F);
+        cp._RectificationR_left.convertTo(cp._RectificationR_left, CV_32F);
+    }
+    if (T.type() != CV_32F)
+    {
+        T.convertTo(T, CV_32F);
+        cp._T.convertTo(cp._T, CV_32F);
+    }
+    if (T.rows != 3)
+        T = T.t();
+
+    // 获取第二个相机到第一个相机间的转换
+    Mat R_inv = R.inv();
+    Mat T_inv = -R.t()*T;
     Mat e1, e2, e3;
     e1 = T_inv.t() / cv::norm(T_inv);
-    e2 = (cv::Mat_<float>(1, 3) << T_inv.at<float>(1)*-1, T_inv.at<float>(0), 0.0);
+    e2 = (cv::Mat_<float>(1, 3) << -1*T_inv.at<float>(1), T_inv.at<float>(0), 0.0);
     e2 = e2 / (sqrt(e2.at<float>(0)*e2.at<float>(0) + e2.at<float>(1)*e2.at<float>(1)));
     e3 = e1.cross(e2);
     e3 = e3 / cv::norm(e3);
-    e1.copyTo(cp._RectificationR_left.row(0));
-    e2.copyTo(cp._RectificationR_left.row(1));
-    e3.copyTo(cp._RectificationR_left.row(2));
-    cv::Mat R2 = R_inv * Mat(cp._RectificationR_left);
-    cp._RectificationR_right = R2;
-    Mat R1 = Mat(cp._RectificationR_left);
-    Mat R2 = Mat(cp._RectificationR_right);
-
-    Mat P1, P2;
-    P1.create(3, 4, CV_32F);
-    P2.create(3, 4, CV_32F);
+    e1.copyTo(R1.row(0));
+    e2.copyTo(R1.row(1));
+    e3.copyTo(R1.row(2));
+    R2 = R_inv *R1;
+   
     
     P1.setTo(cv::Scalar(0));
     R1.copyTo(P1.colRange(0, 3));
-    P1 = Mat(cp._left_camera_matrix)*P1;
+    P1 = K1*P1;
 
     P2.setTo(cv::Scalar(0));
     R2.copyTo(P2.colRange(0, 3));
-    P2 = Mat(cp._right_camera_matrix)*P2;
-
-    cp._P1 = P1;
-    cp._P2 = P2;
+    P2 = K2*P2;
 #endif
 }
 
@@ -89,11 +117,11 @@ void DistortionRecifition::GetRecifyImage(cv::Mat &left_recify_image, cv::Mat &r
 
     cv::remap(_left_image, left_recify_image, _map_x1, _map_y1, inter_polation);
     cv::remap(_right_image, right_recify_image, _map_x2, _map_y2, inter_polation);
-}
+} 
 
 void DistortionRecifition::InitUndistortRectifyMap(cv::InputArray camera_matrix, cv::InputArray discoeffs, cv::InputArray R,
     cv::InputArray new_camera_matrix, cv::Size undis_size, int mltype, cv::OutputArray map1,
-    cv::OutputArray map2, cv::Point2f range_longitude = cv::Point2f(0.0, PI), cv::Point2f range_latitude = cv::Point2f(0.0, PI))
+    cv::OutputArray map2, cv::Point2f range_longitude , cv::Point2f range_latitude )
 {
     Mat _K = camera_matrix.getMat(), _discoeffs = discoeffs.getMat(), _R = R.getMat(),
         _newK = new_camera_matrix.getMat();
@@ -107,6 +135,13 @@ void DistortionRecifition::InitUndistortRectifyMap(cv::InputArray camera_matrix,
     // [x_d;y_d] is the distorted point in image plane, then
     // x_d = x_u*(1+k1*r2+k2*r4+k3*r6)/(1+k4*r2+k5*r4+k6*r6)+2*p1*x_u*y_u+p2*(r2+2*x_u*x_u)
     // the proceeding of y_d is similar to x_d
+
+    // Convert to float 
+    if (_discoeffs.type() != CV_32F)
+    {
+        _discoeffs.convertTo(_discoeffs, CV_32F);
+    }
+
     float k1 = _discoeffs.at<float>(0);
     float k2 = _discoeffs.at<float>(1);
     float p1 = _discoeffs.at<float>(2);

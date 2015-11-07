@@ -14,17 +14,17 @@
 class CameraParam
 {
 public:
-    cv::Matx33d _left_camera_matrix;
-    cv::Matx33d _right_camera_matrix;
-    cv::Matx33d _R;
-    cv::Matx31d _T;
-    cv::Matx41d _Distortion_left;
-    cv::Matx41d _Distortion_right;
-    cv::Matx33d _RectificationR_left;
-    cv::Matx33d _RectificationR_right;
-    cv::Matx34d _P1;
-    cv::Matx34d _P2;
-    cv::Matx44d _Q;
+    cv::Mat _left_camera_matrix;
+    cv::Mat _right_camera_matrix;
+    cv::Mat _R;
+    cv::Mat _T;
+    cv::Mat _Distortion_left;
+    cv::Mat _Distortion_right;
+    cv::Mat _RectificationR_left;
+    cv::Mat _RectificationR_right;
+    cv::Mat _P1;
+    cv::Mat _P2;
+    cv::Mat _Q;
    
     CameraParam& operator=(CameraParam &cp) 
     {
